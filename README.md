@@ -77,6 +77,6 @@ python main.py
 ## 🤖 Uso de Inteligência Artificial
 Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes ferramentas de IA como suporte durante o desenvolvimento:
 
-Google Gemini: Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
+- **Google Gemini:** Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
 
-GitHub Copilot: Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
+- **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
