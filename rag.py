@@ -23,7 +23,7 @@ def processar_pdf(nome_arquivo):
     ids = [f"{nome_arquivo}_chunk_{i}" for i in range(len(chunks))]
     
    # Armazenando os chunks no Chroma
-    colecao.add(
+    colecao.upsert(
         documents=chunks,
         ids=ids
     )
