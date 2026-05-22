@@ -80,3 +80,30 @@ Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes fer
 - **Google Gemini:** Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
 
 - **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
+
+## 🚀 Funcionalidades
+
+* **Gerenciamento de Tarefas (SQLite):** Adição, listagem e conclusão de tarefas diárias salvas em um banco de dados relacional local pelo próprio usuário.
+* **Tool Calling Customizado (JSON):** Implementação via prompt estruturado para que a IA decida acessar o banco de dados ou a base de PDFs.
+* **Análise de Materiais Acadêmicos (RAG):** Leitura de documentos PDF em lote e busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
+* **Melhorias de Aprendizado:** * *Geração de Exercícios:* O sistema lê os PDFs e cria questões inéditas de múltipla escolha com gabarito para o usuário praticar.
+  * *Active Recall (Interativo):* O Jarvis elabora uma pergunta curta, aguarda a resposta do usuário, avalia se ele acertou ou errou e explica o conceito correto com base no histórico da conversa.
+
+---
+
+## 📝 Avaliação do Sistema (Testes RAG)
+
+Conforme os critérios de avaliação da disciplina, o sistema foi testado com perguntas focadas nos materiais fornecidos. Abaixo está o relatório de validação das respostas geradas pelo RAG:
+
+| ID | Pergunta Efetuada | Documento Recuperado no Log | Classificação do Sistema |
+|:--:|---|---|:---:|
+| 1 | *[Sua Pergunta 1]* | *[Trecho do Log]* | Correta ✅ |
+| 2 | *[Sua Pergunta 2]* | *[Trecho do Log]* | Correta ✅ |
+| 3 | *[Sua Pergunta 3]* | *[Trecho do Log]* | Parcialmente Correta ⚠️ |
+| 4 | *[Sua Pergunta 4]* | *[Trecho do Log]* | Correta ✅ |
+| 5 | *[Sua Pergunta 5]* | *[Trecho do Log]* | Incorreta ❌ |
+| 6 | *[Sua Pergunta 6]* | *[Trecho do Log]* | Correta ✅ |
+| 7 | *[Sua Pergunta 7]* | *[Trecho do Log]* | Correta ✅ |
+| 8 | *[Sua Pergunta 8]* | *[Trecho do Log]* | Parcialmente Correta ⚠️ |
+| 9 | *[Sua Pergunta 9]* | *[Trecho do Log]* | Correta ✅ |
+| 10| *[Sua Pergunta 10]*| *[Trecho do Log]* | Correta ✅ |
