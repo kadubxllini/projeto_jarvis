@@ -37,16 +37,16 @@ O repositório contém apenas os arquivos essenciais para o funcionamento. Arqui
 └── README.md
 ```
 
-⚙️ Como Instalar e Executar
+## ⚙️ Como Instalar e Executar
 Siga os passos abaixo para rodar o projeto na sua máquina:
 
-1. Clone o repositório:
+** 1. Clone o repositório:**
 ```bash
 git clone <URL_DO_SEU_REPOSITORIO>
 cd <NOME_DA_PASTA>
 ```
 
-2. Crie e ative um ambiente virtual:
+**2. Crie e ative um ambiente virtual:**
 ```bash
 python -m venv venv
 # No Windows:
@@ -55,28 +55,28 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-3. Instale as dependências:
+**3. Instale as dependências:**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Prepare o Banco Vetorial (RAG):
+**4. Prepare o Banco Vetorial (RAG):**
 Coloque os seus arquivos .pdf acadêmicos dentro dea pasta data.
 ```bash
 # Após colocar os PDFs na pasta, rode:
 python rag.py
 ```
-(Isso criará a pasta chroma_db localmente com os dados processados).
+*(Isso criará a pasta chroma_db localmente com os dados processados).*
 
-5. Inicie o Assistente:
+**5. Inicie o Assistente:**
 ```bash
 python main.py
 ```
-(Digite sua pergunta no terminal. Para encerrar, digite "sair").
+*(Digite sua pergunta no terminal. Para encerrar, digite "sair").*
 
-🤖 Uso de Inteligência Artificial (Item 12.1)
-Conforme os requisitos do edital da disciplina, declaro o uso das seguintes ferramentas de IA como suporte durante o desenvolvimento:
+## 🤖 Uso de Inteligência Artificial
+Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes ferramentas de IA como suporte durante o desenvolvimento:
 
-Google Gemini: Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
+- **Google Gemini:** Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
 
-Codeium / Cursor: Utilizado para autocompletar blocos de código e agilizar a formatação sintática no editor.
+- **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
