@@ -62,7 +62,7 @@ def escolher_ferramenta(msg):
 Você é um roteador de ferramentas.
 
 Na MAIORIA das vezes, a resposta correta é:
-"nenhuma"
+"chat"
 
 Use ferramentas APENAS quando necessário.
 
@@ -74,15 +74,15 @@ Ferramentas disponíveis:
 - buscar_material_rag
 - gerar_exercicios
 - fazer_pergunta
-- nenhuma
+- chat
 
 REGRAS IMPORTANTES:
 
-- Conversas normais -> nenhuma
-- Cumprimentos -> nenhuma
-- Perguntas pessoais -> nenhuma
-- Perguntas sobre memória -> nenhuma
-- Perguntas simples -> nenhuma
+- Conversas normais -> chat
+- Cumprimentos -> chat
+- Perguntas pessoais -> chat
+- Perguntas sobre memória -> chat
+- Perguntas simples -> chat
 
 Use "fazer_pergunta" APENAS quando o usuário quiser ser testado.
 
@@ -199,7 +199,7 @@ def conversar(msg):
     # CHAT NORMAL
     # =================================================
 
-    if ferramenta == "nenhuma":
+    if ferramenta == "chat":
 
         resposta = client.chat.completions.create(
             model=MODEL,
