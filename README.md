@@ -42,8 +42,8 @@ Siga os passos abaixo para rodar o projeto na sua máquina:
 
 **1. Clone o repositório:**
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO>
-cd <NOME_DA_PASTA>
+git clone https://github.com/kadubxllini/projeto_jarvis.git
+cd projeto_jarvis
 ```
 
 **2. Crie e ative um ambiente virtual:**
