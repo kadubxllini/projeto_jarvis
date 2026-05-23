@@ -3,191 +3,402 @@ import json
 import banco_dados
 import rag
 
-# Conecta na IA (Gemma-3.12b-it) usando a API Key fornecida
+# =====================================================
+# CONFIGURAÇÃO DO SERVIDOR
+# =====================================================
+
 client = OpenAI(
-    base_url='https://llm.liaufms.org/v1/gemma-3-12b-it',
-    api_key='Cxt2ftLF7d3mHS2JdiFqB-eSDAQeZvFATPXPs02lV9A'
+    base_url="https://llm.liaufms.org/v1/gemma-3-12b-it",
+    api_key="Cxt2ftLF7d3mHS2JdiFqB-eSDAQeZvFATPXPs02lV9A"
 )
 
-# --- 1. O CARDÁPIO COMPLETO DE FERRAMENTAS ---
-minhas_ferramentas = [
+MODEL = "google/gemma-3-12b-it"
+
+# =====================================================
+# MEMÓRIA
+# =====================================================
+
+prompt_sistema = """
+Você é Jarvis, um assistente acadêmico.
+
+Você:
+- conversa naturalmente
+- ajuda nos estudos
+- responde perguntas sobre PDFs
+- gera exercícios
+- faz active recall
+- avalia respostas do usuário
+
+Você possui memória da conversa.
+"""
+
+historico_chat = [
     {
-        "type": "function",
-        "function": {
-            "name": "adicionar_tarefa",
-            "description": "Adiciona uma nova tarefa na lista de afazeres.",
-            "parameters": {
-                "type": "object",
-                "properties": {"descricao": {"type": "string"}},
-                "required": ["descricao"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {"name": "listar_tarefas", "description": "Busca e lista todas as tarefas pendentes."}
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "concluir_tarefa",
-            "description": "Marca uma tarefa como concluída pelo seu ID.",
-            "parameters": {
-                "type": "object",
-                "properties": {"id_tarefa": {"type": "string"}},
-                "required": ["id_tarefa"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "buscar_material_rag",
-            "description": "Busca informações ou explicações nos materiais/PDFs do usuário.",
-            "parameters": {
-                "type": "object",
-                "properties": {"pergunta": {"type": "string"}},
-                "required": ["pergunta"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "gerar_exercicios",
-            "description": "Gera exercícios de múltipla escolha sobre um assunto.",
-            "parameters": {
-                "type": "object",
-                "properties": {"assunto": {"type": "string"}},
-                "required": ["assunto"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "fazer_pergunta",
-            "description": "Elabora uma pergunta para testar o conhecimento do usuário (Active Recall).",
-            "parameters": {
-                "type": "object",
-                "properties": {"assunto": {"type": "string"}},
-                "required": ["assunto"]
-            }
-        }
+        "role": "system",
+        "content": prompt_sistema
     }
 ]
 
-# --- 2. CONFIGURAÇÃO DA MEMÓRIA ---
-prompt_sistema = """Você é o Jarvis, um assistente acadêmico. Você responde a perguntas baseadas nos materiais do usuário e o auxilia com suas tarefas.
-REGRA DE AVALIAÇÃO (ACTIVE RECALL):
-Se você acabou de fazer uma pergunta para o usuário e ele respondeu, aja como um professor. Avalie a resposta dele, diga se ele acertou ou errou, e explique o conceito correto."""
+# =====================================================
+# IA ESCOLHE A FERRAMENTA
+# =====================================================
 
-historico_chat = [
-    {"role": "system", "content": prompt_sistema}
-]
+def escolher_ferramenta(msg):
 
-def conversar_com_jarvis(mensagem_usuario):
     global historico_chat
-    
-    historico_chat.append({"role": "user", "content": mensagem_usuario})
 
-    # --- ROTEADOR (O Backend decide a Tool) ---
-    prompt_roteador = """Analise a última mensagem do usuário. Escolha APENAS UMA das opções abaixo que melhor descreve a intenção dele:
-    - adicionar_tarefa
-    - listar_tarefas
-    - concluir_tarefa
-    - buscar_material_rag
-    - gerar_exercicios
-    - fazer_pergunta
-    - nenhuma
+    contexto = historico_chat[-6:]
 
-    Responda APENAS com o nome exato da opção, sem aspas, pontos ou textos adicionais."""
+    contexto_formatado = ""
 
-    resposta_roteador = client.chat.completions.create(
-        model='google/gemma-3-12b-it',
-        messages=[{"role": "system", "content": prompt_roteador}, {"role": "user", "content": mensagem_usuario}],
-        temperature=0.0 # Condição pro roteador não inventar respostas
+    for item in contexto:
+
+        contexto_formatado += f"""
+{item['role']}:
+{item['content']}
+"""
+
+    prompt = f"""
+Você é um roteador de ferramentas.
+
+Na MAIORIA das vezes, a resposta correta é:
+"nenhuma"
+
+Use ferramentas APENAS quando necessário.
+
+Ferramentas disponíveis:
+
+- adicionar_tarefa
+- listar_tarefas
+- concluir_tarefa
+- buscar_material_rag
+- gerar_exercicios
+- fazer_pergunta
+- nenhuma
+
+REGRAS IMPORTANTES:
+
+- Conversas normais -> nenhuma
+- Cumprimentos -> nenhuma
+- Perguntas pessoais -> nenhuma
+- Perguntas sobre memória -> nenhuma
+- Perguntas simples -> nenhuma
+
+Use "fazer_pergunta" APENAS quando o usuário quiser ser testado.
+
+Use "buscar_material_rag" APENAS quando o usuário quiser explicações baseadas nos PDFs.
+
+Contexto recente:
+{contexto_formatado}
+
+Mensagem atual:
+"{msg}"
+
+Responda apenas o nome da ferramenta.
+"""
+
+    resposta = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0
     )
-    
-    ferramenta_escolhida = resposta_roteador.choices[0].message.content.strip().lower()
-    
-    ferramentas_validas = ["adicionar_tarefa", "listar_tarefas", "concluir_tarefa", "buscar_material_rag", "gerar_exercicios", "fazer_pergunta"]
 
-    # --- NAMED FUNCTION CALLING ---
-    if ferramenta_escolhida in ferramentas_validas:
-        print(f"[LOG] Roteador ativou o Named Function Calling para: {ferramenta_escolhida}")
-        
-        resposta_parametros = client.chat.completions.create(
-            model='google/gemma-3-12b-it',
-            messages=historico_chat,
-            tools=minhas_ferramentas,
-            tool_choice={"type": "function", "function": {"name": ferramenta_escolhida}}
+    ferramenta = resposta.choices[0].message.content.strip()
+
+    ferramenta = ferramenta.replace(".", "")
+    ferramenta = ferramenta.replace("\n", "")
+    ferramenta = ferramenta.strip()
+
+    print(f"\n[LOG TOOL] {ferramenta}\n")
+
+    return ferramenta
+
+# =====================================================
+# EXTRAÇÃO DOS ARGUMENTOS
+# =====================================================
+
+def extrair_argumentos(ferramenta, msg):
+
+    exemplos = {
+        "adicionar_tarefa": '{"descricao": "<texto da tarefa extraído da mensagem>"}',
+        "listar_tarefas": '{}',
+        "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
+        "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
+        "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',
+        "fazer_pergunta": '{"assunto": "<assunto extraído da mensagem>"}'
+    }
+
+    prompt = f"""
+Você deve responder APENAS JSON válido.
+
+Ferramenta:
+{ferramenta}
+
+JSON obrigatório:
+{exemplos[ferramenta]}
+
+IMPORTANTE:
+- Use EXATAMENTE os mesmos nomes de campos do exemplo
+- Não invente campos novos
+- Não explique nada
+- Não use markdown
+
+Mensagem:
+"{msg}"
+"""
+
+    try:
+
+        resposta = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0
         )
 
-        tool_call = resposta_parametros.choices[0].message.tool_calls[0]
-        
-        argumentos = json.loads(tool_call.function.arguments) if tool_call.function.arguments else {}
+        texto = resposta.choices[0].message.content
 
-        # --- EXECUTA A AÇÃO NO PYTHON ---
-        if ferramenta_escolhida == "adicionar_tarefa":
-            resultado = banco_dados.adicionar_tarefa(argumentos.get("descricao"))
-            resposta_final = f"Jarvis: {resultado}"
-            
-        elif ferramenta_escolhida == "listar_tarefas":
-            resultado = banco_dados.listar_tarefas()
-            resposta_final = f"Jarvis:\n{resultado}"
-            
-        elif ferramenta_escolhida == "concluir_tarefa":
-            resultado = banco_dados.concluir_tarefa(argumentos.get("id_tarefa"))
-            resposta_final = f"Jarvis: {resultado}"
-            
-        elif ferramenta_escolhida == "buscar_material_rag":
-            pergunta = argumentos.get("pergunta")
-            trechos = rag.buscar_no_material(pergunta)
-            print(f"[LOG] Trechos recuperados:\n{trechos[:300]}...\n")
-            prompt_rag = f"Baseado ÚNICA E EXCLUSIVAMENTE nestes trechos do material:\n{trechos}\n\nResponda à pergunta: {pergunta}"
-            resposta_rag = client.chat.completions.create(model='google/gemma-3-12b-it', messages=[{"role": "user", "content": prompt_rag}])
-            resposta_final = f"Jarvis: {resposta_rag.choices[0].message.content}"
+        texto = texto.replace("```json", "")
+        texto = texto.replace("```", "")
+        texto = texto.strip()
 
-        elif ferramenta_escolhida == "gerar_exercicios":
-            assunto = argumentos.get("assunto")
-            trechos = rag.buscar_no_material(assunto)
-            prompt_rag = f"Baseado nestes trechos:\n{trechos}\n\nCrie 3 exercícios de múltipla escolha sobre '{assunto}'. Coloque o gabarito no final."
-            resposta_rag = client.chat.completions.create(model='google/gemma-3-12b-it', messages=[{"role": "user", "content": prompt_rag}])
-            resposta_final = f"Jarvis:\n{resposta_rag.choices[0].message.content}"
+        print(f"\n[LOG JSON]\n{texto}")
 
-        elif ferramenta_escolhida == "fazer_pergunta":
-            assunto = argumentos.get("assunto")
-            trechos = rag.buscar_no_material(assunto)
-            prompt_rag = f"Baseado nestes trechos:\n{trechos}\n\nFaça UMA pergunta direta para testar o conhecimento do usuário sobre '{assunto}'. NÃO dê a resposta."
-            resposta_rag = client.chat.completions.create(model='google/gemma-3-12b-it', messages=[{"role": "user", "content": prompt_rag}])
-            resposta_final = f"Jarvis:\n{resposta_rag.choices[0].message.content}"
+        return json.loads(texto)
 
-        # Salva na memória e imprime
-        historico_chat.append({"role": "assistant", "content": resposta_final})
-        return resposta_final
+    except Exception as e:
 
-    # --- BATE-PAPO NORMAL OU AVALIAÇÃO DE RESPOSTA ---
-    else:
-        print("\n[LOG] Nenhuma ferramenta ativada. Gerando resposta em texto livre...\n")
-        resposta_normal = client.chat.completions.create(
-            model='google/gemma-3-12b-it',
+        print(f"\n[ERRO JSON] {e}")
+        return None
+
+# =====================================================
+# CONVERSA
+# =====================================================
+
+def conversar(msg):
+
+    global historico_chat
+
+    historico_chat.append({
+        "role": "user",
+        "content": msg
+    })
+
+    ferramenta = escolher_ferramenta(msg)
+
+    # =================================================
+    # CHAT NORMAL
+    # =================================================
+
+    if ferramenta == "nenhuma":
+
+        resposta = client.chat.completions.create(
+            model=MODEL,
             messages=historico_chat
         )
-        texto_livre = resposta_normal.choices[0].message.content
-        historico_chat.append({"role": "assistant", "content": texto_livre})
-        return f"Jarvis: {texto_livre}"
 
-# --- EXECUTANDO O JARVIS ---
-if __name__ == "__main__":
-    print("Jarvis iniciado! (Digite 'sair' para encerrar)")
+        texto = resposta.choices[0].message.content
+
+        historico_chat.append({
+            "role": "assistant",
+            "content": texto
+        })
+
+        return texto
+
+    # =================================================
+    # EXTRAÇÃO DOS ARGUMENTOS
+    # =================================================
+
+    argumentos = extrair_argumentos(
+        ferramenta,
+        msg
+    )
+
+    if argumentos is None:
+        return "Erro ao gerar argumentos."
+
+    print(f"\n[LOG ARGS] {argumentos}\n")
+
+    # =================================================
+    # ADICIONAR TAREFA
+    # =================================================
+
+    if ferramenta == "adicionar_tarefa":
+
+        resposta = banco_dados.adicionar_tarefa(
+            argumentos.get("descricao")
+        )
+
+    # =================================================
+    # LISTAR TAREFAS
+    # =================================================
+
+    elif ferramenta == "listar_tarefas":
+
+        resposta = banco_dados.listar_tarefas()
+
+    # =================================================
+    # CONCLUIR TAREFA
+    # =================================================
+
+    elif ferramenta == "concluir_tarefa":
+
+        resposta = banco_dados.concluir_tarefa(
+            argumentos.get("id_tarefa")
+        )
+
+    # =================================================
+    # BUSCAR MATERIAL RAG
+    # =================================================
+
+    elif ferramenta == "buscar_material_rag":
+
+        pergunta = argumentos.get("pergunta")
+
+        if not pergunta:
+            return "Não consegui identificar a pergunta."
+
+        trechos = rag.buscar_no_material(pergunta)
+
+        print(f"\n[LOG RAG]\n{trechos[:500]}")
+
+        prompt = f"""
+Baseado APENAS nestes trechos:
+{trechos}
+
+Responda:
+{pergunta}
+"""
+
+        resposta_llm = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        resposta = resposta_llm.choices[0].message.content
+
+    # =================================================
+    # GERAR EXERCÍCIOS
+    # =================================================
+
+    elif ferramenta == "gerar_exercicios":
+
+        assunto = argumentos.get("assunto")
+
+        if not assunto:
+            return "Não consegui identificar o assunto dos exercícios."
+
+        trechos = rag.buscar_no_material(assunto)
+
+        prompt = f"""
     
-    while True:
-        texto_usuario = input("\nVocê: ")
-        
-        if texto_usuario.lower() == 'sair':
-            print("Encerrando o Jarvis...")
-            break
+Baseado APENAS nestes trechos:
+{trechos}
 
-        resposta = conversar_com_jarvis(texto_usuario)
-        print(resposta)
+
+O usuário pediu o seguinte pedido:
+{msg}
+
+Crie os exercícios de acordo com o que o usuário pediu acima (quantidade, modelo, etc):
+{assunto}
+
+Com gabarito.
+"""
+
+        resposta_llm = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        resposta = resposta_llm.choices[0].message.content
+
+    # =================================================
+    # ACTIVE RECALL
+    # =================================================
+
+    elif ferramenta == "fazer_pergunta":
+
+        assunto = argumentos.get("assunto")
+
+        if not assunto:
+            return "Não consegui identificar o assunto da pergunta."
+
+        trechos = rag.buscar_no_material(assunto)
+
+        prompt = f"""
+Baseado APENAS nestes trechos:
+{trechos}
+
+Faça UMA pergunta sobre:
+{assunto}
+
+Não dê a resposta.
+"""
+
+        resposta_llm = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        resposta = resposta_llm.choices[0].message.content
+
+    # =================================================
+    # FERRAMENTA INVÁLIDA
+    # =================================================
+
+    else:
+
+        resposta = "Ferramenta inválida."
+
+    # =================================================
+    # SALVA NA MEMÓRIA
+    # =================================================
+
+    historico_chat.append({
+        "role": "assistant",
+        "content": resposta
+    })
+
+    return resposta
+
+# =====================================================
+# LOOP PRINCIPAL
+# =====================================================
+
+print("Jarvis iniciado!")
+
+while True:
+
+    msg = input("\nVocê: ")
+
+    if msg.lower() == "sair":
+        break
+
+    resposta = conversar(msg)
+    print("=" * 50)
+    print(f"\nJarvis: {resposta}")

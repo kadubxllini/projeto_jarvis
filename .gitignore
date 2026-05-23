@@ -2,4 +2,3 @@ venv/
 __pycache__/
 *.db
 chroma_db/
-data/

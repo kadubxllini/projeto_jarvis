@@ -15,14 +15,14 @@ def processar_pdf(nome_arquivo):
         if pagina.extract_text():
             texto_completo += pagina.extract_text() + "\n"
             
-    # Dividindo o texto em chunks para o Chroma
+    # Dividindo o texto em 1000 chunks para o Chroma
     tamanho_chunk = 1000
     chunks = [texto_completo[i:i+tamanho_chunk] for i in range(0, len(texto_completo), tamanho_chunk)]
     
     # Criando IDs únicos para cada chunk
     ids = [f"{nome_arquivo}_chunk_{i}" for i in range(len(chunks))]
     
-   # Armazenando os chunks no Chroma
+    # Armazenando os chunks no Chroma
     colecao.upsert(
         documents=chunks,
         ids=ids
@@ -41,7 +41,6 @@ def buscar_no_material(pergunta):
          return "\n---\n".join(resultados['documents'][0])
     return "Nenhum material relevante encontrado."
 
-# --- TESTANDO O RAG ---
 # --- ALIMENTANDO O BANCO VETORIAL ---
 if __name__ == "__main__":    
     pasta_dados = "./data"
