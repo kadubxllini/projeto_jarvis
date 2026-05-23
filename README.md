@@ -40,7 +40,7 @@ O repositório contém apenas os arquivos essenciais para o funcionamento. Arqui
 ## ⚙️ Como Instalar e Executar
 Siga os passos abaixo para rodar o projeto na sua máquina:
 
-** 1. Clone o repositório:**
+**1. Clone o repositório:**
 ```bash
 git clone <URL_DO_SEU_REPOSITORIO>
 cd <NOME_DA_PASTA>
