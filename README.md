@@ -87,7 +87,7 @@ Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes fer
 * **Tool Calling Customizado (JSON):** Implementação via prompt estruturado para que a IA decida acessar o banco de dados ou a base de PDFs.
 * **Análise de Materiais Acadêmicos (RAG):** Leitura de documentos PDF em lote e busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
 * **Melhorias de Aprendizado:** * *Geração de Exercícios:* O sistema lê os PDFs e cria questões inéditas de múltipla escolha com gabarito para o usuário praticar.
-  * *Active Recall (Interativo):* O Jarvis elabora uma pergunta curta, aguarda a resposta do usuário, avalia se ele acertou ou errou e explica o conceito correto com base no histórico da conversa.
+  * **Active Recall (Interativo):** O Jarvis elabora uma pergunta curta, aguarda a resposta do usuário, avalia se ele acertou ou errou e explica o conceito correto com base no histórico da conversa.
 
 ---
 
