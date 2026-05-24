@@ -8,9 +8,12 @@ O Jarvis é um assistente virtual de terminal focado em produtividade acadêmica
 
 ## 🚀 Funcionalidades
 
-- **Gerenciamento de Tarefas (SQLite):** Adição, edição e listagem de tarefas diárias salvas em um banco de dados relacional local.
-- **Análise de Materiais Acadêmicos (RAG):** Leitura de documentos PDF em lote e busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
-- **Tool Calling Customizado (JSON):** Implementação de uma mecânica de acionamento de ferramentas via formatação estrita de JSON no prompt de sistema, permitindo que o modelo decida quando acessar o banco de dados ou a base de PDFs de forma autônoma.
+* **Gerenciamento de Tarefas (SQLite):** Adição, edição, listagem e conclusão de tarefas diárias salvas em um banco de dados relacional local pelo próprio usuário.
+* **Agenda Acadêmica (SQLite):** Agendamento e consulta de compromissos e avaliações por períodos específicos (hoje, amanhã, semana ou tudo). Conta com sincronização e injeção dinâmica da data atual no prompt, permitindo que a IA faça cálculos matemáticos temporais exatos e ignore as limitações de ano do seu treinamento original.
+* **Tool Calling Customizado (JSON):** Implementação via prompt estruturado para que a IA decida acessar o banco de dados ou a base de PDFs.
+* **Análise de Materiais Acadêmicos (RAG):** Leitura de documentos PDF em lote e busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
+* **Melhorias de Aprendizado:** * **Geração de Exercícios:** O sistema lê os PDFs e cria questões inéditas de múltipla escolha com gabarito para o usuário praticar.
+  * **Active Recall (Interativo):** O Jarvis elabora uma pergunta curta, aguarda a resposta do usuário, avalia se ele acertou ou errou e explica o conceito correto com base no histórico da conversa.
 
 ---
 
@@ -74,20 +77,30 @@ python main.py
 ```
 *(Digite sua pergunta no terminal. Para encerrar, digite "sair").*
 
+---
+
+## 📂 Sobre o Dataset
+- **Origem:** 10 arquivos em PDF contendo material acadêmico da UFMS.
+- **Conteúdo:** Teoria e código sobre C, Python, Orientação a Objetos (LPOO) e SQL.
+
+## ⚠️ Limitações dos Dados (PDF)
+- **Perda de formatação:** A extração do texto quebra a indentação (o que afeta a semântica do código em Python).
+- **Perda de símbolos:** Caracteres especiais de programação (como %, _, {}) muitas vezes são ignorados na leitura.
+- **Elementos visuais:** Gráficos, diagramas de memória e tabelas não são compreendidos.
+
+## ⚙️ Estratégia de Chunking e Impacto no RAG
+- **Como foi feito:** O sistema recupera 2 chunks inteiros por busca, enviando um contexto amplo para a IA.
+- **Ponto Positivo (Zero Alucinação):** O contexto maior força o grounding. Se a resposta não está no texto, a IA avisa em vez de inventar.
+- **Ponto Negativo (Busca de Código):** A busca semântica (vetorial) tem dificuldade em localizar trechos exatos de código isolados no meio de textos teóricos.
+
+---
+
 ## 🤖 Uso de Inteligência Artificial
 Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes ferramentas de IA como suporte durante o desenvolvimento:
 
 - **Google Gemini:** Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
 
 - **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
-
-## 🚀 Funcionalidades
-
-* **Gerenciamento de Tarefas (SQLite):** Adição, edição, listagem e conclusão de tarefas diárias salvas em um banco de dados relacional local pelo próprio usuário.
-* **Tool Calling Customizado (JSON):** Implementação via prompt estruturado para que a IA decida acessar o banco de dados ou a base de PDFs.
-* **Análise de Materiais Acadêmicos (RAG):** Leitura de documentos PDF em lote e busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
-* **Melhorias de Aprendizado:** * *Geração de Exercícios:* O sistema lê os PDFs e cria questões inéditas de múltipla escolha com gabarito para o usuário praticar.
-  * **Active Recall (Interativo):** O Jarvis elabora uma pergunta curta, aguarda a resposta do usuário, avalia se ele acertou ou errou e explica o conceito correto com base no histórico da conversa.
 
 ---
 
