@@ -110,7 +110,7 @@ Conforme os critérios de avaliação da disciplina, o sistema foi testado com p
 
 OBS: No teste 6 e 7, foram feitas perguntas que não estão no pdf, mas contém conteúdo semelhante, pra avaliar se a LLM respondia mesmo assim ou não.
 
-| ID | Pergunta Efetuada | Documento Recuperado no Log | Classificação do Sistema | OBS |
+| ID | Pergunta Efetuada | Documento Recuperado no Log : 500 | Classificação do Sistema | OBS |
 |:--:|---|---|:---:|---|
 | 1 | Na função de inserção de uma Lista Encadeada em C, qual é a finalidade da linha de código `No* novo = (No*) malloc(sizeof(No));` e o que ela faz na memória? | `(b) Usando a função do item (a), escreva um programa que receba um número inteiro n > 0... 2 No * novo = (No *) malloc (sizeof(No));` | Correta ✅ | - |
 | 2 | Ao implementar a remoção (pop) em uma estrutura de Pilha em C, qual condição lógica é testada no comando `if (pilha->inicio == NULL)` e qual mensagem é exibida se essa condição for verdadeira? | `dessa avaliação seja verdadeiro, o primeiro bloco de instruções será executado e, ao término desse bloco...` | Parcialmente Correta ⚠️ | Pegou a parte errada no RAG devido a palavras genéricas, mas não respondeu o que não devia devido ao conteúdo não estar no trecho recuperado. |
