@@ -69,6 +69,7 @@ Use ferramentas APENAS quando necessário.
 Ferramentas disponíveis:
 
 - adicionar_tarefa
+- editar_tarefa
 - listar_tarefas
 - concluir_tarefa
 - buscar_material_rag
@@ -126,6 +127,7 @@ def extrair_argumentos(ferramenta, msg):
 
     exemplos = {
         "adicionar_tarefa": '{"descricao": "<texto da tarefa extraído da mensagem>"}',
+        "editar_tarefa": '{"id_tarefa": "<número do id>", "nova_descricao": "<novo texto da tarefa>"}',
         "listar_tarefas": '{}',
         "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
         "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
@@ -239,6 +241,17 @@ def conversar(msg):
             argumentos.get("descricao")
         )
 
+    # =================================================
+    # EDITAR TAREFA
+    # =================================================
+
+    elif ferramenta == "editar_tarefa":
+
+        resposta = banco_dados.editar_tarefa(
+            argumentos.get("id_tarefa"),
+            argumentos.get("nova_descricao")
+        )
+        
     # =================================================
     # LISTAR TAREFAS
     # =================================================
