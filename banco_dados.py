@@ -6,6 +6,7 @@ def conectar():
     conn.row_factory = sqlite3.Row
     return conn
 
+# --- CRIAÇÃO DO BANCO DE DADOS ---
 def inicializar_banco():
     conn = conectar()
     cursor = conn.cursor()
@@ -37,6 +38,25 @@ def adicionar_evento(descricao, data):
     conn.close()
     return f"Evento '{descricao}' agendado para {data}."
 
+def editar_evento(evento_id, nova_descricao=None, nova_data=None):
+    conn = conectar()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT descricao, data FROM agenda WHERE id = ?', (evento_id,))
+    evento_atual = cursor.fetchone()
+    
+    if not evento_atual:
+        conn.close()
+        return f"Erro: Evento {evento_id} não encontrado."
+        
+    desc = nova_descricao if nova_descricao else evento_atual['descricao']
+    dt = nova_data if nova_data else evento_atual['data']
+    
+    cursor.execute('UPDATE agenda SET descricao = ?, data = ? WHERE id = ?', (desc, dt, evento_id))
+    conn.commit()
+    conn.close()
+    return f"Evento {evento_id} atualizado para: '{desc}' no dia {dt}."
+
 def consultar_agenda(periodo):
     conn = conectar()
     cursor = conn.cursor()
@@ -52,7 +72,6 @@ def consultar_agenda(periodo):
         fim_semana = (hoje + datetime.timedelta(days=7)).strftime('%Y-%m-%d')
         cursor.execute('SELECT * FROM agenda WHERE data BETWEEN ? AND ?', (hoje_str, fim_semana))
     else:
-        # Se a IA passar "tudo" ou qualquer outra coisa, busca tudo dali pra frente
         cursor.execute('SELECT * FROM agenda WHERE data >= ? ORDER BY data ASC', (hoje_str,))
 
     eventos = cursor.fetchall()
@@ -63,8 +82,16 @@ def consultar_agenda(periodo):
     
     lista = f"Eventos encontrados ({periodo}):\n"
     for e in eventos:
-        lista += f"- Data: {e['data']} | O que: {e['descricao']}\n"
+        lista += f"- ID: {e['id']} | Data: {e['data']} | O que: {e['descricao']}\n"
     return lista
+
+def apagar_evento(evento_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM agenda WHERE id = ?', (evento_id,))
+    conn.commit()
+    conn.close()
+    return f"Evento {evento_id} apagado com sucesso da agenda."
 
 # --- FUNÇÕES DAS TAREFAS (Funcionalidade 3.3) ---
 

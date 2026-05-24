@@ -80,7 +80,9 @@ Ferramentas disponíveis:
 - listar_tarefas
 - concluir_tarefa
 - adicionar_evento
+- editar_evento
 - consultar_agenda
+- apagar_evento
 - buscar_material_rag
 - gerar_exercicios
 - fazer_pergunta
@@ -143,7 +145,9 @@ def extrair_argumentos(ferramenta, msg):
         "listar_tarefas": '{}',
         "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
         "adicionar_evento": '{"descricao": "<descrição do evento>", "data": "<data no formato DD-MM-YYYY>"}',
+        "editar_evento": '{"id_evento": "<número do id>", "nova_descricao": "<novo texto ou null se não mudar>", "nova_data": "<nova data YYYY-MM-DD ou null se não mudar>"}',
         "consultar_agenda": '{"periodo": "<escolha apenas uma palavra: hoje, amanha, semana ou tudo>"}',
+        "apagar_evento": '{"id_evento": "<número do id>"}',
         "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
         "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',
         "fazer_pergunta": '{"assunto": "<assunto extraído da mensagem>"}'
@@ -250,8 +254,10 @@ def conversar(msg):
     print(f"\n[LOG ARGS] {argumentos}\n")
 
     # =================================================
-    # ADICIONAR TAREFA
+    # TAREFAS: ADICIONAR, EDITAR, LISTAR, CONCLUIR
     # =================================================
+
+    # --- ADICIONAR TAREFA ---
 
     if ferramenta == "adicionar_tarefa":
 
@@ -259,9 +265,7 @@ def conversar(msg):
             argumentos.get("descricao")
         )
 
-    # =================================================
-    # EDITAR TAREFA
-    # =================================================
+    # --- EDITAR TAREFA ---
 
     elif ferramenta == "editar_tarefa":
 
@@ -270,17 +274,13 @@ def conversar(msg):
             argumentos.get("nova_descricao")
         )
         
-    # =================================================
-    # LISTAR TAREFAS
-    # =================================================
+    # --- LISTAR TAREFAS ---
 
     elif ferramenta == "listar_tarefas":
 
         resposta = banco_dados.listar_tarefas()
 
-    # =================================================
-    # CONCLUIR TAREFA
-    # =================================================
+    # --- CONCLUIR TAREFA ---
 
     elif ferramenta == "concluir_tarefa":
 
@@ -289,8 +289,10 @@ def conversar(msg):
         )
 
     # =================================================
-    # AGENDA: ADICIONAR
+    # AGENDA: ADICIONAR, EDITAR, CONSULTAR, APAGAR
     # =================================================
+
+    # --- AGENDA: ADICIONAR ---
 
     elif ferramenta == "adicionar_evento":
         resposta = banco_dados.adicionar_evento(
@@ -298,9 +300,16 @@ def conversar(msg):
             argumentos.get("data")
         )
 
-    # =================================================
-    # AGENDA: CONSULTAR
-    # =================================================
+    # --- AGENDA: EDITAR ---
+
+    elif ferramenta == "editar_evento":
+        resposta = banco_dados.editar_evento(
+            argumentos.get("id_evento"),
+            argumentos.get("nova_descricao"),
+            argumentos.get("nova_data")
+        )
+
+    # --- AGENDA: CONSULTAR ---
 
     elif ferramenta == "consultar_agenda":
         periodo = argumentos.get("periodo")
@@ -320,6 +329,13 @@ Responda à pergunta do usuário de forma natural e direta:
             messages=[{"role": "user", "content": prompt}]
         )
         resposta = resposta_llm.choices[0].message.content
+
+    # --- AGENDA: APAGAR ---
+
+    elif ferramenta == "apagar_evento":
+        resposta = banco_dados.apagar_evento(
+            argumentos.get("id_evento")
+        )
 
     # =================================================
     # BUSCAR MATERIAL RAG
