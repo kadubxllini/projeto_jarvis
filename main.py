@@ -2,6 +2,7 @@ from openai import OpenAI
 import json
 import banco_dados
 import rag
+import datetime
 
 # =====================================================
 # CONFIGURAÇÃO DO SERVIDOR
@@ -18,8 +19,14 @@ MODEL = "google/gemma-3-12b-it"
 # MEMÓRIA
 # =====================================================
 
-prompt_sistema = """
+# Pegar a data de hoje para usar como referência pra agenda
+data_hoje = datetime.date.today().strftime('%Y-%m-%d')
+
+prompt_sistema = f"""
 Você é Jarvis, um assistente acadêmico.
+
+A data exata de hoje é {data_hoje}. 
+Use esta data como base absoluta para calcular qualquer dia que o usuário pedir (como "hoje", "amanhã", "próxima segunda", etc).
 
 Você:
 - conversa naturalmente
@@ -72,6 +79,8 @@ Ferramentas disponíveis:
 - editar_tarefa
 - listar_tarefas
 - concluir_tarefa
+- adicionar_evento
+- consultar_agenda
 - buscar_material_rag
 - gerar_exercicios
 - fazer_pergunta
@@ -125,11 +134,16 @@ Responda apenas o nome da ferramenta.
 
 def extrair_argumentos(ferramenta, msg):
 
+    import datetime
+    data_hoje = datetime.date.today().strftime('%Y-%m-%d')
+
     exemplos = {
         "adicionar_tarefa": '{"descricao": "<texto da tarefa extraído da mensagem>"}',
         "editar_tarefa": '{"id_tarefa": "<número do id>", "nova_descricao": "<novo texto da tarefa>"}',
         "listar_tarefas": '{}',
         "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
+        "adicionar_evento": '{"descricao": "<descrição do evento>", "data": "<data no formato DD-MM-YYYY>"}',
+        "consultar_agenda": '{"periodo": "<escolha apenas uma palavra: hoje, amanha, semana ou tudo>"}',
         "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
         "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',
         "fazer_pergunta": '{"assunto": "<assunto extraído da mensagem>"}'
@@ -137,6 +151,10 @@ def extrair_argumentos(ferramenta, msg):
 
     prompt = f"""
 Você deve responder APENAS JSON válido.
+
+IGNORE COMPLETAMENTE a data do seu treinamento.
+Hoje é EXATAMENTE {data_hoje}. 
+Você OBRIGATORIAMENTE deve usar esta data como ponto de partida matemático para calcular dias como "amanhã", "semana que vem", "daqui a 3 dias", etc. 
 
 Ferramenta:
 {ferramenta}
@@ -269,6 +287,39 @@ def conversar(msg):
         resposta = banco_dados.concluir_tarefa(
             argumentos.get("id_tarefa")
         )
+
+    # =================================================
+    # AGENDA: ADICIONAR
+    # =================================================
+
+    elif ferramenta == "adicionar_evento":
+        resposta = banco_dados.adicionar_evento(
+            argumentos.get("descricao"),
+            argumentos.get("data")
+        )
+
+    # =================================================
+    # AGENDA: CONSULTAR
+    # =================================================
+
+    elif ferramenta == "consultar_agenda":
+        periodo = argumentos.get("periodo")
+        dados_brutos = banco_dados.consultar_agenda(periodo)
+
+        print(f"\n[LOG AGENDA]\n{dados_brutos}\n")
+
+        prompt = f"""
+Baseado nos dados que o banco de dados retornou:
+{dados_brutos}
+
+Responda à pergunta do usuário de forma natural e direta:
+"{msg}"
+"""
+        resposta_llm = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        resposta = resposta_llm.choices[0].message.content
 
     # =================================================
     # BUSCAR MATERIAL RAG
