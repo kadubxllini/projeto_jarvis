@@ -9,11 +9,11 @@ import datetime
 # =====================================================
 
 client = OpenAI(
-    base_url="https://llm.liaufms.org/v1/gemma-3-12b-it",
-    api_key="Cxt2ftLF7d3mHS2JdiFqB-eSDAQeZvFATPXPs02lV9A"
+    base_url="https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq",
+    api_key="REIkURcI7rTTqsTwlJi8MrgnKFw0iqky7Ezh7hH-l-k"
 )
 
-MODEL = "google/gemma-3-12b-it"
+MODEL = "Qwen/Qwen2.5-14B-Instruct-AWQ"
 
 # =====================================================
 # MEMÓRIA
@@ -86,6 +86,7 @@ Ferramentas disponíveis:
 - buscar_material_rag
 - gerar_exercicios
 - fazer_pergunta
+- planejar_estudos
 - chat
 
 REGRAS IMPORTANTES:
@@ -95,6 +96,7 @@ REGRAS IMPORTANTES:
 - Perguntas pessoais -> chat
 - Perguntas sobre memória -> chat
 - Perguntas simples -> chat
+- Para organizar o tempo, perguntar o que priorizar ou montar planos de estudo -> planejar_estudos
 
 Use "fazer_pergunta" APENAS quando o usuário quiser ser testado.
 
@@ -150,7 +152,8 @@ def extrair_argumentos(ferramenta, msg):
         "apagar_evento": '{"id_evento": "<número do id>"}',
         "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
         "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',
-        "fazer_pergunta": '{"assunto": "<assunto extraído da mensagem>"}'
+        "fazer_pergunta": '{"assunto": "<assunto extraído da mensagem>"}',
+        "planejar_estudos": '{"assunto": "<assunto específico para focar, ou null se for geral>"}'
     }
 
     prompt = f"""
@@ -445,6 +448,48 @@ Não dê a resposta.
             ]
         )
 
+        resposta = resposta_llm.choices[0].message.content
+
+    # =================================================
+    # PLANEJAMENTO DE ESTUDOS (Funcionalidade 3.4)
+    # =================================================
+
+    elif ferramenta == "planejar_estudos":
+        
+        assunto = argumentos.get("assunto")
+        
+        tarefas_pendentes = banco_dados.listar_tarefas()
+        agenda_semana = banco_dados.consultar_agenda("semana")
+        
+        trechos_rag = "Nenhum material específico consultado (planejamento geral)."
+        if assunto and str(assunto).lower() != "null":
+            trechos_rag = rag.buscar_no_material(assunto)
+
+        print("\n[LOG PLANO] Cruzando dados: Tarefas + Agenda + Materiais...\n")
+
+        prompt = f"""
+Você é um mentor acadêmico estratégico.
+
+TAREFAS PENDENTES DO USUÁRIO:
+{tarefas_pendentes}
+
+AGENDA DA SEMANA DO USUÁRIO:
+{agenda_semana}
+
+MATERIAIS DE ESTUDO (RAG):
+{trechos_rag}
+
+O usuário pediu:
+"{msg}"
+
+Sua missão:
+Crie um plano de ação claro e direto. Diga o que ele deve priorizar cruzando as tarefas com a agenda. Se houver materiais de estudo, use-os para dar dicas do que focar no conteúdo.
+"""
+
+        resposta_llm = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": prompt}]
+        )
         resposta = resposta_llm.choices[0].message.content
 
     # =================================================
