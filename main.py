@@ -10,7 +10,7 @@ import datetime
 
 client = OpenAI(
     base_url="https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq",
-    api_key="REIkURcI7rTTqsTwlJi8MrgnKFw0iqky7Ezh7hH-l-k"
+    api_key="REIkURcI7rTTqsTwlJi8MrgnKFwOiqky7Ezh7hH-l-k"
 )
 
 MODEL = "Qwen/Qwen2.5-14B-Instruct-AWQ"
