@@ -515,15 +515,29 @@ Crie um plano de ação claro e direto. Diga o que ele deve priorizar cruzando a
 # LOOP PRINCIPAL
 # =====================================================
 
-print("Jarvis iniciado!")
+import gradio as gr
 
-while True:
+# =====================================================
+# INTERFACE GRADIO
+# =====================================================
 
-    msg = input("\nVocê: ")
+def responder(mensagem, historico):
+    """
+    Função que o Gradio chama a cada nova mensagem.
+    'mensagem' é o que você digitou.
+    'historico' é o que já foi falado (o Gradio gerencia isso).
+    """
+    # Chama a sua função original 'conversar' que processa a lógica
+    resposta = conversar(mensagem)
+    return resposta
 
-    if msg.lower() == "sair":
-        break
+# Configuração da interface estilo Chat
+interface = gr.ChatInterface(
+    fn=responder,
+    title="Jarvis Acadêmico",
+    description="Assistente para estudos e organização."
+)
 
-    resposta = conversar(msg)
-    print("=" * 50)
-    print(f"\nJarvis: {resposta}")
+if __name__ == "__main__":
+    print("Iniciando interface Gradio...")
+    interface.launch()
