@@ -138,6 +138,8 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
     if argumentos is None:
         return "Erro ao gerar argumentos."
 
+    trechos_usados = None
+
     # =================================================
     # TAREFAS: ADICIONAR, EDITAR, LISTAR, CONCLUIR
     # =================================================
@@ -238,6 +240,7 @@ Nenhum evento encontrado.
             return "Não consegui identificar a pergunta."
 
         trechos = rag.buscar_no_material(pergunta)
+        trechos_usados = trechos
 
         prompt = f"""
 Baseado APENAS nestes trechos:
@@ -271,6 +274,7 @@ Responda:
             return "Não consegui identificar o assunto dos exercícios."
 
         trechos = rag.buscar_no_material(assunto)
+        trechos_usados = trechos
 
         prompt = f"""
     
@@ -311,6 +315,7 @@ Com gabarito.
             return "Não consegui identificar o assunto da pergunta."
 
         trechos = rag.buscar_no_material(assunto)
+        trechos_usados = trechos
 
         prompt = f"""
 Baseado APENAS nestes trechos:
@@ -358,6 +363,7 @@ Não dê a resposta.
         trechos_rag = "Nenhum material específico consultado (planejamento geral)."
         if assunto and str(assunto).lower() != "null":
             trechos_rag = rag.buscar_no_material(assunto)
+            trechos_usados = trechos
 
         prompt = f"""
 Você é um mentor acadêmico estratégico.
@@ -401,6 +407,6 @@ Crie um plano de ação claro e direto. Diga o que ele deve priorizar cruzando a
         "content": resposta
     })
 
-    registrar_log(ferramenta, msg, resposta)
+    registrar_log(ferramenta, msg, resposta, trechos_usados)
 
     return resposta

@@ -29,13 +29,13 @@ def interface_responder(mensagem, historico):
     return "", historico
 
 if __name__ == "__main__":
-    with gr.Blocks(title="Jarvis") as interface:
+    with gr.Blocks(title="Jarvis", fill_height=True) as interface:
         gr.Markdown("# ok JARVIS")
     
         with gr.Row():
             # LADO ESQUERDO: CHAT
             with gr.Column(scale=2):
-                chatbot = gr.Chatbot(height=450)
+                chatbot = gr.Chatbot(height="700px")
                 with gr.Row():
                     msg = gr.Textbox(placeholder="Fale com o Jarvis...", show_label=False, scale=4)
                     btn_enviar = gr.Button("Enviar", scale=1)
