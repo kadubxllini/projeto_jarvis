@@ -54,6 +54,19 @@ pergunta_ativa = ""
 assunto_ativo = ""
 
 # =====================================================
+# REGISTRO DE LOGS
+# =====================================================
+
+def registrar_log(ferramenta, entrada, saida):
+    agora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open("logs.txt", "a", encoding="utf-8") as f:
+        f.write(f"[{agora}]\n")
+        f.write(f"FERRAMENTA: {ferramenta}\n")
+        f.write(f"ENTRADA: {entrada}\n")
+        f.write(f"SAÍDA: {saida}\n")
+        f.write("-" * 80 + "\n")
+
+# =====================================================
 # IA ESCOLHE A FERRAMENTA
 # =====================================================
 
@@ -261,6 +274,8 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
             "content": resposta
         })
         
+        registrar_log(ferramenta, msg, texto)
+
         return resposta
 
     ferramenta = escolher_ferramenta(msg)
@@ -282,6 +297,8 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
             "role": "assistant",
             "content": texto
         })
+
+        registrar_log(ferramenta, msg, texto)
 
         return texto
 
@@ -548,13 +565,15 @@ Crie um plano de ação claro e direto. Diga o que ele deve priorizar cruzando a
         resposta = "Ferramenta inválida."
 
     # =================================================
-    # SALVA NA MEMÓRIA
+    # SALVA NA MEMÓRIA E NO LOG
     # =================================================
 
     historico_chat.append({
         "role": "assistant",
         "content": resposta
     })
+
+    registrar_log(ferramenta, msg, texto)
 
     return resposta
 
