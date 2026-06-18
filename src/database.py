@@ -131,5 +131,3 @@ def concluir_tarefa(tarefa_id):
     conn.commit()
     conn.close()
     return f"Tarefa {tarefa_id} marcada como concluída."
-
-inicializar_banco()

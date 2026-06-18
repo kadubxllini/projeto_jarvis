@@ -1,15 +1,15 @@
 from openai import OpenAI
-import json
+import os
+import datetime
+from dotenv import load_dotenv
 import src.database as database
 import src.rag as rag
-import datetime
 import gradio as gr
-import os
-from dotenv import load_dotenv
-from src.database import inicializar_banco
+from src.tools import escolher_ferramenta, extrair_argumentos
+from src.logger import registrar_log
 
 # =====================================================
-# CONFIGURAÇÃO DO SERVIDOR
+# CONFIGURAÇÃO DO CLIENTE
 # =====================================================
 
 load_dotenv()
@@ -54,180 +54,6 @@ historico_chat = [
 estado_jarvis = "normal"
 pergunta_ativa = ""
 assunto_ativo = ""
-
-# =====================================================
-# REGISTRO DE LOGS
-# =====================================================
-
-def registrar_log(ferramenta, entrada, saida):
-    agora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    with open("logs.txt", "a", encoding="utf-8") as f:
-        f.write(f"[{agora}]\n")
-        f.write(f"FERRAMENTA: {ferramenta}\n")
-        f.write(f"ENTRADA: {entrada}\n")
-        f.write(f"SAÍDA: {saida}\n")
-        f.write("-" * 80 + "\n")
-
-# =====================================================
-# IA ESCOLHE A FERRAMENTA
-# =====================================================
-
-def escolher_ferramenta(msg):
-
-    global historico_chat
-
-    contexto = historico_chat[-6:]
-
-    contexto_formatado = ""
-
-    for item in contexto:
-
-        contexto_formatado += f"""
-{item['role']}:
-{item['content']}
-"""
-
-    prompt = f"""
-Você é um roteador de ferramentas.
-
-Na MAIORIA das vezes, a resposta correta é:
-"chat"
-
-Use ferramentas APENAS quando necessário.
-
-Ferramentas disponíveis:
-
-- adicionar_tarefa
-- editar_tarefa
-- listar_tarefas
-- concluir_tarefa
-- adicionar_evento
-- editar_evento
-- consultar_agenda
-- apagar_evento
-- buscar_material_rag
-- gerar_exercicios
-- fazer_pergunta
-- planejar_estudos
-- chat
-
-REGRAS IMPORTANTES:
-
-- Conversas normais -> chat
-- Cumprimentos -> chat
-- Perguntas pessoais -> chat
-- Perguntas sobre memória -> chat
-- Perguntas simples -> chat
-- Para organizar o tempo, perguntar o que priorizar ou montar planos de estudo -> planejar_estudos
-
-Use "fazer_pergunta" APENAS quando o usuário quiser ser testado.
-
-Use "buscar_material_rag" APENAS quando o usuário quiser explicações baseadas nos PDFs.
-
-Contexto recente:
-{contexto_formatado}
-
-Mensagem atual:
-"{msg}"
-
-Responda apenas o nome da ferramenta.
-"""
-
-    resposta = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        temperature=0
-    )
-
-    ferramenta = resposta.choices[0].message.content.strip()
-
-    ferramenta = ferramenta.replace(".", "")
-    ferramenta = ferramenta.replace("\n", "")
-    ferramenta = ferramenta.strip()
-
-    print(f"\n[LOG TOOL] {ferramenta}\n")
-
-    return ferramenta
-
-# =====================================================
-# EXTRAÇÃO DOS ARGUMENTOS
-# =====================================================
-
-def extrair_argumentos(ferramenta, msg):
-
-    import datetime
-    data_hoje = datetime.date.today().strftime('%Y-%m-%d')
-
-    exemplos = {
-        "adicionar_tarefa": '{"descricao": "<texto da tarefa extraído da mensagem>"}',
-        "editar_tarefa": '{"id_tarefa": "<número do id>", "nova_descricao": "<novo texto da tarefa>"}',
-        "listar_tarefas": '{}',
-        "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
-        "adicionar_evento": '{"descricao": "<descrição do evento>", "data": "<data no formato DD-MM-YYYY>"}',
-        "editar_evento": '{"id_evento": "<número do id>", "nova_descricao": "<novo texto ou null se não mudar>", "nova_data": "<nova data YYYY-MM-DD ou null se não mudar>"}',
-        "consultar_agenda": '{"data_inicio": "<YYYY-MM-DD ou null>", "data_fim": "<YYYY-MM-DD ou null>"}',
-        "apagar_evento": '{"id_evento": "<número do id>"}',
-        "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
-        "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',
-        "fazer_pergunta": '{"assunto": "<assunto extraído da mensagem>"}',
-        "planejar_estudos": '{"assunto": "<assunto específico para focar, ou null se for geral>"}'
-    }
-
-    prompt = f"""
-Você deve responder APENAS JSON válido.
-
-IGNORE COMPLETAMENTE a data do seu treinamento.
-Hoje é EXATAMENTE {data_hoje}. 
-Você OBRIGATORIAMENTE deve usar esta data como ponto de partida matemático para calcular dias como "amanhã", "semana que vem", "daqui a 3 dias", etc. 
-
-Ferramenta:
-{ferramenta}
-
-JSON obrigatório:
-{exemplos[ferramenta]}
-
-IMPORTANTE:
-- Use EXATAMENTE os mesmos nomes de campos do exemplo
-- Não invente campos novos
-- Não explique nada
-- Não use markdown
-
-Mensagem:
-"{msg}"
-"""
-
-    try:
-
-        resposta = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0
-        )
-
-        texto = resposta.choices[0].message.content
-
-        texto = texto.replace("```json", "")
-        texto = texto.replace("```", "")
-        texto = texto.strip()
-
-        print(f"\n[LOG JSON]\n{texto}")
-
-        return json.loads(texto)
-
-    except Exception as e:
-
-        print(f"\n[ERRO JSON] {e}")
-        return None
 
 # =====================================================
 # CONVERSA
@@ -276,11 +102,11 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
             "content": resposta
         })
         
-        registrar_log(ferramenta, msg, texto)
+        registrar_log("fazer_pergunta", msg, resposta)
 
         return resposta
 
-    ferramenta = escolher_ferramenta(msg)
+    ferramenta = escolher_ferramenta(msg, historico_chat)
 
     # =================================================
     # CHAT NORMAL
@@ -308,10 +134,7 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
     # EXTRAÇÃO DOS ARGUMENTOS
     # =================================================
 
-    argumentos = extrair_argumentos(
-        ferramenta,
-        msg
-    )
+    argumentos = extrair_argumentos(ferramenta, msg)
 
     if argumentos is None:
         return "Erro ao gerar argumentos."
@@ -523,7 +346,7 @@ Não dê a resposta.
         assunto_ativo = assunto
 
     # =================================================
-    # PLANEJAMENTO DE ESTUDOS (Funcionalidade 3.4)
+    # PLANEJAMENTO DE ESTUDOS
     # =================================================
 
     elif ferramenta == "planejar_estudos":
@@ -584,53 +407,3 @@ Crie um plano de ação claro e direto. Diga o que ele deve priorizar cruzando a
     registrar_log(ferramenta, msg, resposta)
 
     return resposta
-
-    #Inicia o banco de dados
-    inicializar_banco()
-
-# =====================================================
-# INTERFACE GRADIO
-# =====================================================
-
-def ver_tarefas_via_ia():
-    resposta_ia = conversar("Jarvis, liste todas as minhas tarefas pendentes por favor.")
-    return resposta_ia
-
-def ver_agenda_via_ia():
-    resposta_ia = conversar("Jarvis, o que eu tenho na minha agenda completa?")
-    return resposta_ia
-
-def interface_responder(mensagem, historico):
-    resposta = conversar(mensagem)
-    historico.append({"role": "user", "content": mensagem})
-    historico.append({"role": "assistant", "content": resposta})
-    return "", historico
-
-with gr.Blocks(title ="Jarvis") as interface:
-    gr.Markdown("# ok JARVIS")
-    
-    with gr.Row():
-        # LADO ESQUERDO: CHAT
-        with gr.Column(scale=2):
-            chatbot = gr.Chatbot(height=450)
-            with gr.Row():
-                msg = gr.Textbox(placeholder="Fale com o Jarvis...", show_label=False, scale=4)
-                btn_enviar = gr.Button("Enviar", scale=1)
-
-            msg.submit(interface_responder, [msg, chatbot], [msg, chatbot])
-            btn_enviar.click(interface_responder, [msg, chatbot], [msg, chatbot])
-
-        # LADO DIREITO: BOTÕES DE DADOS (VIA IA)
-        with gr.Column(scale=1):
-            gr.Markdown("### Consultas Rápidas via IA")
-            btn_tarefas = gr.Button("📋 Tarefas")
-            btn_agenda = gr.Button("📅 Agenda")
-            
-            visor = gr.Textbox(label="Resposta da IA", lines=18, interactive=False)
-            
-            btn_tarefas.click(ver_tarefas_via_ia, outputs=visor)
-            btn_agenda.click(ver_agenda_via_ia, outputs=visor)
-
-if __name__ == "__main__":
-    print("Iniciando Jarvis...")
-    interface.launch(theme="soft")
