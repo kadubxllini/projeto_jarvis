@@ -139,8 +139,6 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
     if argumentos is None:
         return "Erro ao gerar argumentos."
 
-    print(f"\n[LOG ARGS] {argumentos}\n")
-
     # =================================================
     # TAREFAS: ADICIONAR, EDITAR, LISTAR, CONCLUIR
     # =================================================
@@ -354,7 +352,13 @@ Não dê a resposta.
         assunto = argumentos.get("assunto")
         
         tarefas_pendentes = database.listar_tarefas()
-        agenda_semana = database.consultar_agenda("semana")
+        
+        hoje = datetime.date.today()
+        fim_semana = hoje + datetime.timedelta(days=7)
+        agenda_semana = database.consultar_agenda(
+            hoje.strftime('%Y-%m-%d'),
+            fim_semana.strftime('%Y-%m-%d')
+        )
         
         trechos_rag = "Nenhum material específico consultado (planejamento geral)."
         if assunto and str(assunto).lower() != "null":

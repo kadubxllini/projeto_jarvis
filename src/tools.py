@@ -96,8 +96,6 @@ Responda apenas o nome da ferramenta.
     ferramenta = ferramenta.replace("\n", "")
     ferramenta = ferramenta.strip()
 
-    print(f"\n[LOG TOOL] {ferramenta}\n")
-
     return ferramenta
 
 # =====================================================
@@ -165,11 +163,8 @@ Mensagem:
         texto = texto.replace("```", "")
         texto = texto.strip()
 
-        print(f"\n[LOG JSON]\n{texto}")
-
         return json.loads(texto)
 
     except Exception as e:
 
-        print(f"\n[ERRO JSON] {e}")
         return None
