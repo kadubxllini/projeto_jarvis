@@ -244,7 +244,7 @@ Nenhum evento encontrado.
 
         trechos = rag.buscar_no_material(pergunta)
 
-        print(f"\n[LOG RAG]\n{trechos[:500]}")
+        print(f"\n[LOG RAG]\n{trechos}")
 
         prompt = f"""
 Baseado APENAS nestes trechos:
