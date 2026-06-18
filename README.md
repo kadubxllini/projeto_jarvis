@@ -11,11 +11,13 @@ O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) foc
 * **Interface Web Amigável (Gradio):** Chatbot interativo lado a lado com um painel de consultas rápidas via IA para ver tarefas e compromissos de forma rápida.
 * **Gerenciamento de Tarefas (SQLite):** Adição, edição, listagem e conclusão de tarefas pendentes salvas em um banco de dados local.
 * **Agenda Acadêmica (SQLite):** Agendamento, edição, remoção e consulta de eventos/compromissos. Conta com injeção dinâmica da data atual no prompt, permitindo que a IA faça cálculos temporais exatos (como calcular datas relativas a "amanhã" ou "próxima segunda") sem sofrer com limitações de ano do seu treinamento original.
+* **Planejamento de Estudos (SQLite + RAG):** Integração inteligente para criar um plano de ação personalizado. O Jarvis cruza as tarefas pendentes, os compromissos da agenda e os materiais de estudo relevantes (RAG) baseados no assunto solicitado para sugerir prioridades e tópicos de foco.
 * **Tool Calling Customizado (JSON):** Tomada de decisão estruturada por prompt para que a IA decida dinamicamente quando acessar as tarefas, a agenda ou realizar uma busca na base de PDFs.
 * **Análise de Materiais Acadêmicos (RAG):** Sincronização automática e leitura de documentos PDF em lote com busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
 * **Melhorias de Aprendizado:**
   * **Geração de Exercícios:** O sistema lê os PDFs e cria questões personalizadas com gabarito baseado estritamente na base de conhecimento fornecida.
   * **Active Recall (Interativo):** O Jarvis formula uma pergunta curta baseada nos PDFs, aguarda a resposta do usuário, avalia e classifica a resposta (como Correta, Parcialmente Correta ou Incorreta) explicando os conceitos corretos.
+* **Registro de Auditoria (Logs locais):** Todas as interações (ferramentas selecionadas, argumentos extraídos, mensagens do usuário e respostas obtidas) são registradas no arquivo local `logs.txt` para fins de depuração e histórico.
 
 ---
 
@@ -36,12 +38,9 @@ O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) foc
 O repositório contém apenas os arquivos essenciais para o funcionamento. Arquivos pesados ou de armazenamento local (como o banco de dados SQLite e o banco de dados vetorial do Chroma) são criados de forma automática e local na primeira execução.
 
 ```text
-├── .env                 # Variáveis de ambiente (API_KEY)
-├── .gitignore
-├── jarvis_academico.db  # Banco de dados SQLite (gerado automaticamente)
-├── logs.txt             # Histórico de logs de interações
-├── main.py              # Inicialização do banco, RAG e interface Gradio
-├── requirements.txt     # Dependências do projeto
+├── data/                # Pasta contendo os PDFs de entrada
+│   ├── chroma_db/       # Banco de dados vetorial do Chroma (gerado automaticamente)
+│   └── .rag_index.json  # Índice de sincronização dos PDFs (gerado automaticamente)
 ├── src/
 │   ├── __init__.py
 │   ├── agent.py         # Lógica do agente, tomada de decisão e fluxo de conversa
@@ -49,6 +48,12 @@ O repositório contém apenas os arquivos essenciais para o funcionamento. Arqui
 │   ├── logger.py        # Registro de logs local em arquivo
 │   ├── rag.py           # Configuração do ChromaDB, indexação e busca RAG
 │   └── tools.py         # Mapeamento de intenções e extração de argumentos
+├── .env                 # Variáveis de ambiente (API_KEY)
+├── .gitignore
+├── jarvis_academico.db  # Banco de dados SQLite (gerado automaticamente)
+├── logs.txt             # Histórico de logs de interações (gerado automaticamente)
+├── main.py              # Inicialização do banco, RAG e interface Gradio
+├── requirements.txt     # Dependências do projeto
 └── README.md
 ```
 
