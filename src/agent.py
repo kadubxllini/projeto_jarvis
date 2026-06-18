@@ -4,7 +4,6 @@ import datetime
 from dotenv import load_dotenv
 import src.database as database
 import src.rag as rag
-import gradio as gr
 from src.tools import escolher_ferramenta, extrair_argumentos
 from src.logger import registrar_log
 
@@ -203,8 +202,6 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
         
         dados_brutos = database.consultar_agenda(data_inicio, data_fim)
 
-        print(f"\n[LOG AGENDA]\n{dados_brutos}\n")
-
         prompt = f"""
 Baseado nos dados do banco de dados:
 {dados_brutos}
@@ -241,8 +238,6 @@ Nenhum evento encontrado.
             return "Não consegui identificar a pergunta."
 
         trechos = rag.buscar_no_material(pergunta)
-
-        print(f"\n[LOG RAG]\n{trechos}")
 
         prompt = f"""
 Baseado APENAS nestes trechos:
@@ -363,8 +358,6 @@ Não dê a resposta.
         trechos_rag = "Nenhum material específico consultado (planejamento geral)."
         if assunto and str(assunto).lower() != "null":
             trechos_rag = rag.buscar_no_material(assunto)
-
-        print("\n[LOG PLANO] Cruzando dados: Tarefas + Agenda + Materiais...\n")
 
         prompt = f"""
 Você é um mentor acadêmico estratégico.
