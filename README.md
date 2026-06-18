@@ -107,12 +107,6 @@ python main.py
 - **Origem:** Arquivos em PDF contendo material acadêmico da UFMS.
 - **Conteúdo:** Teoria e código sobre C, Python, Programação Orientada a Objetos e SQL.
 
-## ⚠️ Limitações dos Dados (PDF)
-
-- **Perda de formatação:** A extração do texto cru quebra a indentação (o que pode dificultar a semântica do código em Python).
-- **Perda de símbolos:** Caracteres especiais de programação (como `%`, `_`, `{}`) muitas vezes são ignorados na extração dependendo do encoding.
-- **Elementos visuais:** Gráficos, diagramas de arquitetura/memória e tabelas complexas não são compreendidos pela extração simples de texto.
-
 ## ⚙️ Estratégia de Chunking e Impacto no RAG
 
 - **Como foi feito:** Divisão em pedaços (chunks) de tamanho fixo. O sistema recupera 2 chunks por busca, enviando o contexto para a IA.
@@ -126,5 +120,6 @@ python main.py
 Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes ferramentas de IA como suporte durante o desenvolvimento:
 
 - **Google Gemini:** Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
+- **Google NotebookLM:** Utilizado para conselho na criação e correção da Avaliação do Sistema (Testes RAG).
 - **Anthropic Claude:** Utilizado no início do desenvolvimento para auxiliar na modelagem do esqueleto do projeto e discussão de ideias de arquitetura.
 - **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
