@@ -57,30 +57,25 @@ def editar_evento(evento_id, nova_descricao=None, nova_data=None):
     conn.close()
     return f"Evento {evento_id} atualizado para: '{desc}' no dia {dt}."
 
-def consultar_agenda(periodo):
+def consultar_agenda(data_inicio=None, data_fim=None):
     conn = conectar()
     cursor = conn.cursor()
-    hoje = datetime.date.today()
-    hoje_str = hoje.strftime('%Y-%m-%d')
 
-    if periodo == "hoje":
-        cursor.execute('SELECT * FROM agenda WHERE data = ?', (hoje_str,))
-    elif periodo == "amanha":
-        amanha = (hoje + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-        cursor.execute('SELECT * FROM agenda WHERE data = ?', (amanha,))
-    elif periodo == "semana":
-        fim_semana = (hoje + datetime.timedelta(days=7)).strftime('%Y-%m-%d')
-        cursor.execute('SELECT * FROM agenda WHERE data BETWEEN ? AND ?', (hoje_str, fim_semana))
-    else:
+    if not data_inicio:
+        hoje_str = datetime.date.today().strftime('%Y-%m-%d')
         cursor.execute('SELECT * FROM agenda WHERE data >= ? ORDER BY data ASC', (hoje_str,))
+    elif data_fim:
+        cursor.execute('SELECT * FROM agenda WHERE data BETWEEN ? AND ? ORDER BY data ASC', (data_inicio, data_fim))
+    else:
+        cursor.execute('SELECT * FROM agenda WHERE data = ? ORDER BY data ASC', (data_inicio,))
 
     eventos = cursor.fetchall()
     conn.close()
 
     if not eventos:
-        return f"Nenhum evento encontrado no banco para o filtro: {periodo}."
+        return "Nenhum evento encontrado no banco."
     
-    lista = f"Eventos encontrados ({periodo}):\n"
+    lista = "Eventos encontrados:\n"
     for e in eventos:
         lista += f"- ID: {e['id']} | Data: {e['data']} | O que: {e['descricao']}\n"
     return lista

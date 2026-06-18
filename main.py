@@ -168,7 +168,7 @@ def extrair_argumentos(ferramenta, msg):
         "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
         "adicionar_evento": '{"descricao": "<descrição do evento>", "data": "<data no formato DD-MM-YYYY>"}',
         "editar_evento": '{"id_evento": "<número do id>", "nova_descricao": "<novo texto ou null se não mudar>", "nova_data": "<nova data YYYY-MM-DD ou null se não mudar>"}',
-        "consultar_agenda": '{"periodo": "<escolha apenas uma palavra: hoje, amanha, semana ou tudo>"}',
+        "consultar_agenda": '{"data_inicio": "<YYYY-MM-DD ou null>", "data_fim": "<YYYY-MM-DD ou null>"}',
         "apagar_evento": '{"id_evento": "<número do id>"}',
         "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
         "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',
@@ -375,17 +375,23 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
     # --- AGENDA: CONSULTAR ---
 
     elif ferramenta == "consultar_agenda":
-        periodo = argumentos.get("periodo")
-        dados_brutos = banco_dados.consultar_agenda(periodo)
+        data_inicio = argumentos.get("data_inicio")
+        data_fim = argumentos.get("data_fim")
+        
+        dados_brutos = banco_dados.consultar_agenda(data_inicio, data_fim)
 
         print(f"\n[LOG AGENDA]\n{dados_brutos}\n")
 
         prompt = f"""
-Baseado nos dados que o banco de dados retornou:
+Baseado nos dados do banco de dados:
 {dados_brutos}
 
-Responda à pergunta do usuário de forma natural e direta:
-"{msg}"
+Sua resposta deve ser APENAS a listagem dos eventos encontrados. 
+Formate cada item estritamente no padrão abaixo, uma linha por evento, sem saudações ou explicações:
+ID: número | Data: YYYY-MM-DD | O que: descrição do evento
+
+Se o banco de dados indicar que não há eventos ou estiver vazio, responda apenas: 
+Nenhum evento encontrado.
 """
         resposta_llm = client.chat.completions.create(
             model=MODEL,
@@ -573,7 +579,7 @@ Crie um plano de ação claro e direto. Diga o que ele deve priorizar cruzando a
         "content": resposta
     })
 
-    registrar_log(ferramenta, msg, texto)
+    registrar_log(ferramenta, msg, resposta)
 
     return resposta
 
@@ -587,23 +593,45 @@ import gradio as gr
 # INTERFACE GRADIO
 # =====================================================
 
-def responder(mensagem, historico):
-    """
-    Função que o Gradio chama a cada nova mensagem.
-    'mensagem' é o que você digitou.
-    'historico' é o que já foi falado (o Gradio gerencia isso).
-    """
-    # Chama a sua função original 'conversar' que processa a lógica
-    resposta = conversar(mensagem)
-    return resposta
+def ver_tarefas_via_ia():
+    resposta_ia = conversar("Jarvis, liste todas as minhas tarefas pendentes por favor.")
+    return resposta_ia
 
-# Configuração da interface estilo Chat
-interface = gr.ChatInterface(
-    fn=responder,
-    title="Jarvis Acadêmico",
-    description="Assistente para estudos e organização."
-)
+def ver_agenda_via_ia():
+    resposta_ia = conversar("Jarvis, o que eu tenho na minha agenda completa?")
+    return resposta_ia
+
+def interface_responder(mensagem, historico):
+    resposta = conversar(mensagem)
+    historico.append({"role": "user", "content": mensagem})
+    historico.append({"role": "assistant", "content": resposta})
+    return "", historico
+
+with gr.Blocks(title ="Jarvis") as interface:
+    gr.Markdown("# ok JARVIS")
+    
+    with gr.Row():
+        # LADO ESQUERDO: CHAT
+        with gr.Column(scale=2):
+            chatbot = gr.Chatbot(height=450)
+            with gr.Row():
+                msg = gr.Textbox(placeholder="Fale com o Jarvis...", show_label=False, scale=4)
+                btn_enviar = gr.Button("Enviar", scale=1)
+
+            msg.submit(interface_responder, [msg, chatbot], [msg, chatbot])
+            btn_enviar.click(interface_responder, [msg, chatbot], [msg, chatbot])
+
+        # LADO DIREITO: BOTÕES DE DADOS (VIA IA)
+        with gr.Column(scale=1):
+            gr.Markdown("### Consultas Rápidas via IA")
+            btn_tarefas = gr.Button("📋 Tarefas")
+            btn_agenda = gr.Button("📅 Agenda")
+            
+            visor = gr.Textbox(label="Resposta da IA", lines=18, interactive=False)
+            
+            btn_tarefas.click(ver_tarefas_via_ia, outputs=visor)
+            btn_agenda.click(ver_agenda_via_ia, outputs=visor)
 
 if __name__ == "__main__":
-    print("Iniciando interface Gradio...")
-    interface.launch()
+    print("Iniciando Jarvis...")
+    interface.launch(theme="soft")
