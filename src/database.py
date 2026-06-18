@@ -65,7 +65,7 @@ def consultar_agenda(data_inicio=None, data_fim=None):
     cursor = conn.cursor()
 
     if not data_inicio:
-        hoje_str = datetime.date.today().strftime('%Y-%m-%d')
+        hoje_str = datetime.date.today().strftime('%d-%m-%Y')
         cursor.execute('SELECT * FROM agenda WHERE data >= ? ORDER BY data ASC', (hoje_str,))
     elif data_fim:
         cursor.execute('SELECT * FROM agenda WHERE data BETWEEN ? AND ? ORDER BY data ASC', (data_inicio, data_fim))

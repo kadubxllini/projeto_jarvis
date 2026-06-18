@@ -65,6 +65,7 @@ REGRAS IMPORTANTES:
 - Perguntas sobre memória -> chat
 - Perguntas simples -> chat
 - Para organizar o tempo, perguntar o que priorizar ou montar planos de estudo -> planejar_estudos
+- Perguntas sobre o que tem na agenda, eventos, compromissos, provas ou "o que tenho hoje/amanhã/essa semana" -> consultar_agenda
 
 Use "fazer_pergunta" APENAS quando o usuário quiser ser testado.
 
@@ -104,7 +105,7 @@ Responda apenas o nome da ferramenta.
 
 def extrair_argumentos(ferramenta, msg):
 
-    data_hoje = datetime.date.today().strftime('%Y-%m-%d')
+    data_hoje = datetime.date.today().strftime('%d-%m-%Y')
 
     exemplos = {
         "adicionar_tarefa": '{"descricao": "<texto da tarefa extraído da mensagem>"}',
@@ -112,8 +113,8 @@ def extrair_argumentos(ferramenta, msg):
         "listar_tarefas": '{}',
         "concluir_tarefa": '{"id_tarefa": "<número do id extraído da mensagem>"}',
         "adicionar_evento": '{"descricao": "<descrição do evento>", "data": "<data no formato DD-MM-YYYY>"}',
-        "editar_evento": '{"id_evento": "<número do id>", "nova_descricao": "<novo texto ou null se não mudar>", "nova_data": "<nova data YYYY-MM-DD ou null se não mudar>"}',
-        "consultar_agenda": '{"data_inicio": "<YYYY-MM-DD ou null>", "data_fim": "<YYYY-MM-DD ou null>"}',
+        "editar_evento": '{"id_evento": "<número do id>", "nova_descricao": "<novo texto ou null se não mudar>", "nova_data": "<nova data DD-MM-YYYY ou null se não mudar>"}',
+        "consultar_agenda": '{"data_inicio": "<DD-MM-YYYY ou null>", "data_fim": "<DD-MM-YYYY ou null>"}',
         "apagar_evento": '{"id_evento": "<número do id>"}',
         "buscar_material_rag": '{"pergunta": "<pergunta extraída da mensagem>"}',
         "gerar_exercicios": '{"assunto": "<assunto extraído da mensagem>"}',

@@ -24,7 +24,7 @@ MODEL = "Qwen/Qwen2.5-14B-Instruct-AWQ"
 # =====================================================
 
 # Pegar a data de hoje para usar como referência pra agenda
-data_hoje = datetime.date.today().strftime('%Y-%m-%d')
+data_hoje = datetime.date.today().strftime('%d-%m-%Y')
 
 prompt_sistema = f"""
 Você é Jarvis, um assistente acadêmico.
@@ -201,6 +201,8 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
     elif ferramenta == "consultar_agenda":
         data_inicio = argumentos.get("data_inicio")
         data_fim = argumentos.get("data_fim")
+    
+        print(f"[DEBUG] data_inicio={repr(data_inicio)} data_fim={repr(data_fim)}")
         
         dados_brutos = database.consultar_agenda(data_inicio, data_fim)
 
@@ -210,7 +212,7 @@ Baseado nos dados do banco de dados:
 
 Sua resposta deve ser APENAS a listagem dos eventos encontrados. 
 Formate cada item estritamente no padrão abaixo, uma linha por evento, sem saudações ou explicações:
-ID: número | Data: YYYY-MM-DD | O que: descrição do evento
+ID: número | Data: DD-MM-YYYY | O que: descrição do evento
 
 Se o banco de dados indicar que não há eventos ou estiver vazio, responda apenas: 
 Nenhum evento encontrado.
@@ -356,8 +358,8 @@ Não dê a resposta.
         hoje = datetime.date.today()
         fim_semana = hoje + datetime.timedelta(days=7)
         agenda_semana = database.consultar_agenda(
-            hoje.strftime('%Y-%m-%d'),
-            fim_semana.strftime('%Y-%m-%d')
+            hoje.strftime('%d-%m-%Y'),
+            fim_semana.strftime('%d-%m-%Y')
         )
         
         trechos_rag = "Nenhum material específico consultado (planejamento geral)."
