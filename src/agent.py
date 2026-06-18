@@ -101,8 +101,8 @@ Depois, dê o feedback explicando o motivo com base nos materiais.
             "content": resposta
         })
         
-        registrar_log("fazer_pergunta", msg, resposta)
-
+        registrar_log("avaliar_resposta_active_recall", msg, resposta)
+        
         return resposta
 
     ferramenta = escolher_ferramenta(msg, historico_chat)

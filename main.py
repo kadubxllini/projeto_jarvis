@@ -28,31 +28,31 @@ def interface_responder(mensagem, historico):
     historico.append({"role": "assistant", "content": resposta})
     return "", historico
 
-with gr.Blocks(title="Jarvis") as interface:
-    gr.Markdown("# ok JARVIS")
-    
-    with gr.Row():
-        # LADO ESQUERDO: CHAT
-        with gr.Column(scale=2):
-            chatbot = gr.Chatbot(height=450)
-            with gr.Row():
-                msg = gr.Textbox(placeholder="Fale com o Jarvis...", show_label=False, scale=4)
-                btn_enviar = gr.Button("Enviar", scale=1)
-
-            msg.submit(interface_responder, [msg, chatbot], [msg, chatbot])
-            btn_enviar.click(interface_responder, [msg, chatbot], [msg, chatbot])
-
-        # LADO DIREITO: BOTÕES DE DADOS (VIA IA)
-        with gr.Column(scale=1):
-            gr.Markdown("### Consultas Rápidas via IA")
-            btn_tarefas = gr.Button("📋 Tarefas")
-            btn_agenda = gr.Button("📅 Agenda")
-            
-            visor = gr.Textbox(label="Resposta da IA", lines=18, interactive=False)
-            
-            btn_tarefas.click(ver_tarefas_via_ia, outputs=visor)
-            btn_agenda.click(ver_agenda_via_ia, outputs=visor)
-
 if __name__ == "__main__":
-    print("Iniciando Jarvis...")
-    interface.launch(theme="soft")
+    with gr.Blocks(title="Jarvis") as interface:
+        gr.Markdown("# ok JARVIS")
+    
+        with gr.Row():
+            # LADO ESQUERDO: CHAT
+            with gr.Column(scale=2):
+                chatbot = gr.Chatbot(height=450)
+                with gr.Row():
+                    msg = gr.Textbox(placeholder="Fale com o Jarvis...", show_label=False, scale=4)
+                    btn_enviar = gr.Button("Enviar", scale=1)
+
+                msg.submit(interface_responder, [msg, chatbot], [msg, chatbot])
+                btn_enviar.click(interface_responder, [msg, chatbot], [msg, chatbot])
+
+            # LADO DIREITO: BOTÕES DE DADOS (VIA IA)
+            with gr.Column(scale=1):
+                gr.Markdown("### Consultas Rápidas via IA")
+                btn_tarefas = gr.Button("📋 Tarefas")
+                btn_agenda = gr.Button("📅 Agenda")
+            
+                visor = gr.Textbox(label="Resposta da IA", lines=18, interactive=False)
+            
+                btn_tarefas.click(ver_tarefas_via_ia, outputs=visor)
+                btn_agenda.click(ver_agenda_via_ia, outputs=visor)
+
+        print("Iniciando Jarvis...")
+        interface.launch(theme="soft")

@@ -114,7 +114,7 @@ def sincronizar_pdfs():
 def buscar_no_material(pergunta):
     resultados = colecao.query(
         query_texts=[pergunta],
-        n_results=3
+        n_results=2
     )
 
     textos_formatados = []
