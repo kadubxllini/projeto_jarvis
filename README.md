@@ -17,7 +17,7 @@ O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) foc
 * **Melhorias de Aprendizado:**
   * **Geração de Exercícios:** O sistema lê os PDFs e cria questões personalizadas com gabarito baseado estritamente na base de conhecimento fornecida.
   * **Active Recall (Interativo):** O Jarvis formula uma pergunta curta baseada nos PDFs, aguarda a resposta do usuário, avalia e classifica a resposta (como Correta, Parcialmente Correta ou Incorreta) explicando os conceitos corretos.
-* **Registro de Auditoria (Logs locais):** Todas as interações (ferramentas selecionadas, argumentos extraídos, mensagens do usuário e respostas obtidas) são registradas no arquivo local `logs.txt` para fins de depuração e histórico.
+* **Registro de Auditoria (Logs locais):** Todas as interações (ferramentas selecionadas, argumentos extraídos, mensagens do usuário e respostas obtidas) são registradas no arquivo local `logs/logs.txt` para fins de depuração e histórico.
 
 ---
 
@@ -29,6 +29,7 @@ O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) foc
 - **Banco de Dados Vetorial:** ChromaDB (para busca semântica dos textos)
 - **Banco de Dados Relacional:** SQLite (para gerenciamento de tarefas e agenda)
 - **Processamento de PDF:** pypdf
+- **Cliente de API LLM:** openai (SDK Python, apontado para a API local)
 - **Gerenciamento de Ambiente:** python-dotenv
 
 ---
@@ -41,6 +42,8 @@ O repositório contém apenas os arquivos essenciais para o funcionamento. Arqui
 ├── data/                # Pasta contendo os PDFs de entrada
 │   ├── chroma_db/       # Banco de dados vetorial do Chroma (gerado automaticamente)
 │   └── .rag_index.json  # Índice de sincronização dos PDFs (gerado automaticamente)
+├── logs/
+│   └── logs.txt         # Histórico de logs de interações (gerado automaticamente)
 ├── src/
 │   ├── __init__.py
 │   ├── agent.py         # Lógica do agente, tomada de decisão e fluxo de conversa
@@ -51,7 +54,6 @@ O repositório contém apenas os arquivos essenciais para o funcionamento. Arqui
 ├── .env                 # Variáveis de ambiente (API_KEY)
 ├── .gitignore
 ├── jarvis_academico.db  # Banco de dados SQLite (gerado automaticamente)
-├── logs.txt             # Histórico de logs de interações (gerado automaticamente)
 ├── main.py              # Inicialização do banco, RAG e interface Gradio
 ├── requirements.txt     # Dependências do projeto
 └── README.md
@@ -113,7 +115,7 @@ python main.py
 
 ## ⚙️ Estratégia de Chunking e Impacto no RAG
 
-- **Como foi feito:** Divisão em pedaços (chunks) de 1000 caracteres. O sistema recupera 3 chunks inteiros por busca, enviando um contexto amplo para a IA.
+- **Como foi feito:** Divisão em pedaços (chunks) de tamanho fixo. O sistema recupera 2 chunks por busca, enviando o contexto para a IA.
 - **Ponto Positivo (Zero Alucinação):** O contexto maior força o grounding. Se a resposta não está no texto, a IA avisa em vez de inventar.
 - **Ponto Negativo (Busca de Código):** A busca semântica (vetorial) tem dificuldade em localizar trechos exatos de código isolados no meio de explicações teóricas.
 
