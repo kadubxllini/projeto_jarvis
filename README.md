@@ -128,9 +128,3 @@ Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes fer
 - **Google Gemini:** Utilizado como suporte técnico e arquitetural, auxiliando na criação da lógica de contorno via JSON para o Tool Calling e na estruturação do banco de dados vetorial (ChromaDB).
 - **Anthropic Claude:** Utilizado no início do desenvolvimento para auxiliar na modelagem do esqueleto do projeto e discussão de ideias de arquitetura.
 - **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
-
----
-
-## 📝 Avaliação do Sistema (Testes RAG)
-
-*Esta seção está em branco e será atualizada após a realização dos novos testes do sistema.*
