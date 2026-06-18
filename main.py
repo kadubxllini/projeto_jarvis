@@ -3,14 +3,17 @@ import json
 import banco_dados
 import rag
 import datetime
+import os
+from dotenv import load_dotenv
 
 # =====================================================
 # CONFIGURAÇÃO DO SERVIDOR
 # =====================================================
 
+load_dotenv()
 client = OpenAI(
     base_url="https://llm.liaufms.org/v1/qwen2-5-14b-instruct-awq",
-    api_key="REIkURcI7rTTqsTwlJi8MrgnKFwOiqky7Ezh7hH-l-k"
+    api_key=os.getenv("API_KEY")
 )
 
 MODEL = "Qwen/Qwen2.5-14B-Instruct-AWQ"
@@ -45,6 +48,10 @@ historico_chat = [
         "content": prompt_sistema
     }
 ]
+
+estado_jarvis = "normal"
+pergunta_ativa = ""
+assunto_ativo = ""
 
 # =====================================================
 # IA ESCOLHE A FERRAMENTA
@@ -213,12 +220,48 @@ Mensagem:
 
 def conversar(msg):
 
-    global historico_chat
+    global historico_chat, estado_jarvis, pergunta_ativa, assunto_ativo
 
     historico_chat.append({
         "role": "user",
         "content": msg
     })
+
+    # INTERCEPTA A MENSAGEM SE ESTIVER NO MODO AVALIAÇÃO
+    if estado_jarvis == "esperando_resposta":
+        trechos = rag.buscar_no_material(assunto_ativo)
+        
+        prompt_avaliacao = f"""
+Você fez a seguinte pergunta de Active Recall para o usuário:
+"{pergunta_ativa}"
+
+O usuário respondeu:
+"{msg}"
+
+Baseado APENAS nestes materiais de estudo:
+{trechos}
+
+Avalie a resposta do usuário. Classifique explicitamente como: Correta, Parcialmente Correta ou Incorreta.
+Depois, dê o feedback explicando o motivo com base nos materiais.
+"""
+        resposta_llm = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": prompt_avaliacao}]
+        )
+        
+        resposta = resposta_llm.choices[0].message.content
+        
+        # Reseta o estado para voltar a conversar normalmente
+        estado_jarvis = "normal"
+        pergunta_ativa = ""
+        assunto_ativo = ""
+        
+        historico_chat.append({
+            "role": "assistant",
+            "content": resposta
+        })
+        
+        return resposta
 
     ferramenta = escolher_ferramenta(msg)
 
@@ -449,6 +492,10 @@ Não dê a resposta.
         )
 
         resposta = resposta_llm.choices[0].message.content
+
+        estado_jarvis = "esperando_resposta"
+        pergunta_ativa = resposta
+        assunto_ativo = assunto
 
     # =================================================
     # PLANEJAMENTO DE ESTUDOS (Funcionalidade 3.4)
