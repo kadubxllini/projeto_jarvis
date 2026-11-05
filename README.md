@@ -1,5 +1,12 @@
 # Jarvis Acadêmico
 
+[![Testes](https://github.com/kadubxllini/projeto_jarvis/actions/workflows/tests.yml/badge.svg)](https://github.com/kadubxllini/projeto_jarvis/actions/workflows/tests.yml)
+
+![Interface do projeto](docs/images/interface.png)
+
+Interface original renderizada localmente, com os serviços de IA e indexação desconectados. A imagem mostra a tela, não uma resposta ou avaliação do modelo.
+
+
 Projeto desenvolvido para a disciplina de Inteligência Artificial do curso de Sistemas de Informação da UFMS (Universidade Federal de Mato Grosso do Sul). 
 
 O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) focado em produtividade acadêmica. Ele é capaz de gerenciar tarefas e compromissos do dia a dia e responder a perguntas com base em materiais de estudo fornecidos pelo usuário, utilizando a arquitetura RAG (Retrieval-Augmented Generation).
@@ -123,3 +130,11 @@ Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes fer
 - **Google NotebookLM:** Utilizado para conselho na criação e correção da Avaliação do Sistema (Testes RAG).
 - **Anthropic Claude:** Utilizado no início do desenvolvimento para auxiliar na modelagem do esqueleto do projeto e discussão de ideias de arquitetura.
 - **GitHub Copilot:** Utilizado como assistente de codificação, auxiliando na sugestão de linhas e blocos de código em tempo real durante o desenvolvimento do projeto.
+
+## Testes automáticos
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+O GitHub Actions verifica sintaxe e testa persistência de tarefas e agenda em bancos temporários. Esses testes não chamam modelos, não usam chaves e não avaliam a qualidade do RAG.
