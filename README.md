@@ -1,17 +1,17 @@
-# Projeto Jarvis Acadêmico 🤖📚
+# Jarvis Acadêmico
 
 Projeto desenvolvido para a disciplina de Inteligência Artificial do curso de Sistemas de Informação da UFMS (Universidade Federal de Mato Grosso do Sul). 
 
-O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) focado em produtividade acadêmica. Ele é capaz de gerenciar tarefas e compromissos do dia a dia e responder a perguntas complexas com base em materiais de estudo fornecidos pelo usuário, utilizando a arquitetura RAG (Retrieval-Augmented Generation).
+O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) focado em produtividade acadêmica. Ele é capaz de gerenciar tarefas e compromissos do dia a dia e responder a perguntas com base em materiais de estudo fornecidos pelo usuário, utilizando a arquitetura RAG (Retrieval-Augmented Generation).
 
 ---
 
-## 🚀 Funcionalidades
+## O que o projeto faz
 
-* **Interface Web Amigável (Gradio):** Chatbot interativo lado a lado com um painel de consultas rápidas via IA para ver tarefas e compromissos de forma rápida.
+* **Interface web (Gradio):** Chatbot interativo lado a lado com um painel de consultas rápidas via IA para ver tarefas e compromissos de forma rápida.
 * **Gerenciamento de Tarefas (SQLite):** Adição, edição, listagem e conclusão de tarefas pendentes salvas em um banco de dados local.
-* **Agenda Acadêmica (SQLite):** Agendamento, edição, remoção e consulta de eventos/compromissos. Conta com injeção dinâmica da data atual no prompt, permitindo que a IA faça cálculos temporais exatos (como calcular datas relativas a "amanhã" ou "próxima segunda") sem sofrer com limitações de ano do seu treinamento original.
-* **Planejamento de Estudos (SQLite + RAG):** Integração inteligente para criar um plano de ação personalizado. O Jarvis cruza as tarefas pendentes, os compromissos da agenda e os materiais de estudo relevantes (RAG) baseados no assunto solicitado para sugerir prioridades e tópicos de foco.
+* **Agenda Acadêmica (SQLite):** Agendamento, edição, remoção e consulta de eventos/compromissos. Conta com injeção dinâmica da data atual no prompt, para ajudar a interpretar datas como "amanhã" ou "próxima segunda". Isso não dispensa a conferência das datas sugeridas.
+* **Planejamento de Estudos (SQLite + RAG):** Integração para criar um plano de ação personalizado. O Jarvis cruza as tarefas pendentes, os compromissos da agenda e os materiais de estudo relevantes (RAG) baseados no assunto solicitado para sugerir prioridades e tópicos de foco.
 * **Tool Calling Customizado (JSON):** Tomada de decisão estruturada por prompt para que a IA decida dinamicamente quando acessar as tarefas, a agenda ou realizar uma busca na base de PDFs.
 * **Análise de Materiais Acadêmicos (RAG):** Sincronização automática e leitura de documentos PDF em lote com busca vetorial por similaridade semântica para responder a perguntas precisas sobre os textos.
 * **Melhorias de Aprendizado:**
@@ -21,7 +21,7 @@ O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) foc
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias
 
 - **Linguagem:** Python 3.x
 - **LLM:** Qwen 2.5 14B Instruct AWQ (via API local/institucional da UFMS)
@@ -34,7 +34,7 @@ O Jarvis é um assistente virtual com interface web (desenvolvida em Gradio) foc
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 O repositório contém apenas os arquivos essenciais para o funcionamento. Arquivos pesados ou de armazenamento local (como o banco de dados SQLite e o banco de dados vetorial do Chroma) são criados de forma automática e local na primeira execução.
 
@@ -61,7 +61,7 @@ O repositório contém apenas os arquivos essenciais para o funcionamento. Arqui
 
 ---
 
-## ⚙️ Como Instalar e Executar
+## Rodar localmente
 
 Siga os passos abaixo para rodar o projeto na sua máquina:
 
@@ -102,20 +102,20 @@ python main.py
 
 ---
 
-## 📂 Sobre o Dataset
+## Sobre o Dataset
 
 - **Origem:** Arquivos em PDF contendo material acadêmico da UFMS.
 - **Conteúdo:** Teoria e código sobre C, Python, Programação Orientada a Objetos e SQL.
 
-## ⚙️ Estratégia de Chunking e Impacto no RAG
+## Estratégia de Chunking e Impacto no RAG
 
 - **Como foi feito:** Divisão em pedaços (chunks) de tamanho fixo. O sistema recupera 2 chunks por busca, enviando o contexto para a IA.
-- **Ponto Positivo (Zero Alucinação):** O contexto maior força o grounding. Se a resposta não está no texto, a IA avisa em vez de inventar.
+- **Limite das respostas:** os trechos recuperados dão contexto ao modelo, mas não garantem respostas corretas. Confira a resposta no PDF, principalmente quando a busca não encontrar o trecho necessário.
 - **Ponto Negativo (Busca de Código):** A busca semântica (vetorial) tem dificuldade em localizar trechos exatos de código isolados no meio de explicações teóricas.
 
 ---
 
-## 🤖 Uso de Inteligência Artificial
+## Uso de Inteligência Artificial
 
 Conforme os requisitos do projeto da disciplina, declaro o uso das seguintes ferramentas de IA como suporte durante o desenvolvimento:
 
